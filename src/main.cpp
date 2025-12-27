@@ -136,7 +136,16 @@ static std::wstring ToWide(const std::string& input) {
 }
 
 static std::string PathToUtf8(const std::filesystem::path& path) {
+#ifdef _WIN32
     return ToUtf8(path.wstring());
+#else
+    try {
+        auto u8 = path.u8string();
+        return std::string(u8.begin(), u8.end());
+    } catch (const std::exception&) {
+        return path.string();
+    }
+#endif
 }
 
 static std::string DefaultOutputName(const std::filesystem::path& path) {
@@ -403,7 +412,11 @@ int main(int, char**) {
         ImGui::PushItemWidth(-120.0f);
         InputTextString("##output", outputDirStr);
         ImGui::PopItemWidth();
+#ifdef _WIN32
         outputDir = std::filesystem::path(ToWide(outputDirStr));
+#else
+        outputDir = std::filesystem::u8path(outputDirStr);
+#endif
         ImGui::SameLine();
         if (ImGui::Button("Browse##output")) {
 #ifdef _WIN32
