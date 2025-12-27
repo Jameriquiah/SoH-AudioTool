@@ -8,6 +8,7 @@
 #include <SDL3/SDL.h>
 
 #include <array>
+#include <cctype>
 #include <filesystem>
 #include <optional>
 #include <string>
@@ -43,6 +44,62 @@ static int ImGuiInputTextCallbackImpl(ImGuiInputTextCallbackData* data) {
 static bool InputTextString(const char* label, std::string& value, ImGuiInputTextFlags flags = 0) {
     flags |= ImGuiInputTextFlags_CallbackResize;
     return ImGui::InputText(label, value.data(), value.capacity() + 1, flags, ImGuiInputTextCallbackImpl, &value);
+}
+
+static std::string UrlDecode(const std::string& value) {
+    std::string out;
+    out.reserve(value.size());
+    for (size_t i = 0; i < value.size(); i++) {
+        char ch = value[i];
+        if (ch == '%' && i + 2 < value.size()) {
+            auto hex = [](char c) -> int {
+                if (c >= '0' && c <= '9') return c - '0';
+                if (c >= 'a' && c <= 'f') return 10 + (c - 'a');
+                if (c >= 'A' && c <= 'F') return 10 + (c - 'A');
+                return -1;
+            };
+            int hi = hex(value[i + 1]);
+            int lo = hex(value[i + 2]);
+            if (hi >= 0 && lo >= 0) {
+                out.push_back(static_cast<char>((hi << 4) | lo));
+                i += 2;
+                continue;
+            }
+        }
+        out.push_back(ch);
+    }
+    return out;
+}
+
+static std::optional<std::filesystem::path> NormalizeDropPath(const char* rawPath) {
+    if (!rawPath) {
+        return std::nullopt;
+    }
+    std::string pathStr(rawPath);
+    if (pathStr.empty()) {
+        return std::nullopt;
+    }
+    size_t newline = pathStr.find_first_of("\r\n");
+    if (newline != std::string::npos) {
+        pathStr = pathStr.substr(0, newline);
+    }
+    constexpr const char* kFilePrefix = "file://";
+    if (pathStr.rfind(kFilePrefix, 0) == 0) {
+        pathStr = pathStr.substr(std::char_traits<char>::length(kFilePrefix));
+        if (pathStr.size() >= 3 && pathStr[0] == '/' && std::isalpha(static_cast<unsigned char>(pathStr[1])) && pathStr[2] == ':') {
+            pathStr.erase(0, 1);
+        }
+        pathStr = UrlDecode(pathStr);
+    }
+    return std::filesystem::path(pathStr);
+}
+
+static bool IsWavPath(const std::filesystem::path& path) {
+    std::string ext = path.extension().string();
+    for (char& ch : ext) {
+        ch = static_cast<char>(std::tolower(static_cast<unsigned char>(ch)));
+    }
+    return ext == ".wav";
 }
 
 static std::string ToUtf8(const std::wstring& input) {
@@ -299,15 +356,15 @@ int main(int, char**) {
                 done = true;
             }
             if (event.type == SDL_EVENT_DROP_FILE) {
-                std::filesystem::path path = event.drop.data;
-                if (path.extension() == ".wav" || path.extension() == ".WAV") {
+                auto dropPath = NormalizeDropPath(event.drop.data);
+                if (dropPath && IsWavPath(*dropPath)) {
                     WavData wav;
                     std::string err;
                     SampleItem item;
-                    item.inputPath = path;
-                    item.outputName = DefaultOutputName(path);
+                    item.inputPath = *dropPath;
+                    item.outputName = DefaultOutputName(*dropPath);
                     item.outputName.reserve(128);
-                    if (ReadWavFile(path, wav, err)) {
+                    if (ReadWavFile(*dropPath, wav, err)) {
                         item.sampleRate = wav.sampleRate;
                         item.tuning = static_cast<double>(wav.sampleRate) / 32000.0;
                         item.status = "Ready";
@@ -316,7 +373,9 @@ int main(int, char**) {
                     }
                     items.push_back(std::move(item));
                 }
-                SDL_free(const_cast<char*>(event.drop.data));
+                if (event.drop.data) {
+                    SDL_free(const_cast<char*>(event.drop.data));
+                }
             }
         }
 
