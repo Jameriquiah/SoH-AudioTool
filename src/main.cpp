@@ -387,9 +387,7 @@ int main(int, char**) {
                     }
                     items.push_back(std::move(item));
                 }
-                if (event.drop.data) {
-                    SDL_free(const_cast<char*>(event.drop.data));
-                }
+                // SDL3 manages drop event memory.
             }
         }
 
@@ -430,6 +428,9 @@ int main(int, char**) {
 
         ImGui::TextDisabled("Loop End = 0 uses last sample. Count = -1 means infinite.");
 
+#ifndef _WIN32
+        ImGui::BeginDisabled();
+#endif
         if (ImGui::Button("Add WAVs")) {
 #ifdef _WIN32
             auto files = OpenWavDialog();
@@ -451,6 +452,11 @@ int main(int, char**) {
             }
 #endif
         }
+#ifndef _WIN32
+        ImGui::EndDisabled();
+        ImGui::SameLine();
+        ImGui::TextDisabled("Use drag-and-drop on this platform.");
+#endif
         ImGui::SameLine();
         if (ImGui::Button("Clear List")) {
             items.clear();
