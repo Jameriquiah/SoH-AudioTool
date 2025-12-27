@@ -46,15 +46,22 @@ if (NOT WIN32)
     target_link_libraries(vadpcm_codec PRIVATE m)
 endif()
 
-add_executable(SoH-AudioTool
+set(SOH_AUDIO_TOOL_SOURCES
     src/main.cpp
     src/AudioFormats.cpp
     src/AudioFormats.h
     src/SohSampleWriter.cpp
     src/SohSampleWriter.h
-    src/Process.cpp
-    src/Process.h
 )
+
+if (WIN32)
+    list(APPEND SOH_AUDIO_TOOL_SOURCES
+        src/Process.cpp
+        src/Process.h
+    )
+endif()
+
+add_executable(SoH-AudioTool ${SOH_AUDIO_TOOL_SOURCES})
 
 target_include_directories(SoH-AudioTool PRIVATE
     src
