@@ -19,7 +19,4 @@ Windows: You need Visual Studio 2022 with `Desktop development with C++`
 	5. Then run `"C:\Program Files\CMake\bin\cmake.exe" --build build --config Release`
 	6. Exe will be in `\build\Release`
 
-This is for Windows only right now. I don't have a mac or linux machine to build and test on.
-
-For Linux users you can run the tool through a VM and use it that way. For Mac users idk.
-I will try to get working Linux and Mac builds soon.
+Tested on Windows and Linux, haven't tested Mac yet since I don't have a Mac to test on but report any issues or crashes if you try it please.
