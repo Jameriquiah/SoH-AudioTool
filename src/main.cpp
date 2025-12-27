@@ -91,7 +91,12 @@ static std::optional<std::filesystem::path> NormalizeDropPath(const char* rawPat
         }
         pathStr = UrlDecode(pathStr);
     }
-    return std::filesystem::path(pathStr);
+    try {
+        std::u8string u8(pathStr.begin(), pathStr.end());
+        return std::filesystem::u8path(u8);
+    } catch (const std::exception&) {
+        return std::nullopt;
+    }
 }
 
 static bool IsWavPath(const std::filesystem::path& path) {
