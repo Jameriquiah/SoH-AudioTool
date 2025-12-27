@@ -12,6 +12,17 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
+      - name: Set artifact name
+        run: |
+          if [ "${{ runner.os }}" = "Windows" ]; then
+            echo "ARTIFACT_NAME=SoH-AudioTool-windows" >> $GITHUB_ENV
+          elif [ "${{ runner.os }}" = "macOS" ]; then
+            echo "ARTIFACT_NAME=SoH-AudioTool-macos" >> $GITHUB_ENV
+          else
+            echo "ARTIFACT_NAME=SoH-AudioTool-linux" >> $GITHUB_ENV
+          fi
+        shell: bash
+
       - name: Checkout
         uses: actions/checkout@v4
         with:
@@ -22,7 +33,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y build-essential cmake \
-            libx11-dev libxrandr-dev libxi-dev libxext-dev libxcursor-dev libxss-dev \
+            libx11-dev libxrandr-dev libxi-dev libxext-dev libxcursor-dev libxss-dev libxtst-dev \
             libwayland-dev libxkbcommon-dev libpulse-dev libasound2-dev
 
       - name: Apply VADPCM patch (Windows)
@@ -40,12 +51,12 @@ jobs:
         if: runner.os == 'Windows'
         uses: actions/upload-artifact@v4
         with:
-          name: SoH-AudioTool-${{ matrix.os }}
+          name: ${{ env.ARTIFACT_NAME }}
           path: build/Release/SoH-AudioTool.exe
 
       - name: Upload artifact (Linux/macOS)
         if: runner.os != 'Windows'
         uses: actions/upload-artifact@v4
         with:
-          name: SoH-AudioTool-${{ matrix.os }}
+          name: ${{ env.ARTIFACT_NAME }}
           path: build/SoH-AudioTool
