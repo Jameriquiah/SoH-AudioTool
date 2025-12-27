@@ -406,10 +406,6 @@ int main(int, char**) {
                      ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
                          ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse);
 
-        ImGui::Text("vadpcm tool:");
-        ImGui::SameLine();
-        ImGui::TextDisabled("built-in encoder");
-
         ImGui::Text("Output folder:");
         ImGui::PushItemWidth(-120.0f);
         InputTextString("##output", outputDirStr);
@@ -434,8 +430,9 @@ int main(int, char**) {
         }
 #ifndef _WIN32
         ImGui::EndDisabled();
-        ImGui::SameLine();
-        ImGui::TextDisabled("Manual path or drag-and-drop.");
+        if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+            ImGui::SetTooltip("Manual path or drag-and-drop.");
+        }
 #endif
 
         ImGui::TextDisabled("Loop End = 0 uses last sample. Count = -1 means infinite.");

@@ -61,7 +61,11 @@ if (WIN32)
     )
 endif()
 
-add_executable(SoH-AudioTool ${SOH_AUDIO_TOOL_SOURCES})
+if (WIN32)
+    add_executable(SoH-AudioTool WIN32 ${SOH_AUDIO_TOOL_SOURCES})
+else()
+    add_executable(SoH-AudioTool ${SOH_AUDIO_TOOL_SOURCES})
+endif()
 
 target_include_directories(SoH-AudioTool PRIVATE
     src
