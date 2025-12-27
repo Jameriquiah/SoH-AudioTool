@@ -20,6 +20,13 @@
 #include <shlobj.h>
 #endif
 
+#ifdef _WIN32
+int main(int, char**);
+int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
+    return main(__argc, __argv);
+}
+#endif
+
 struct SampleItem {
     std::filesystem::path inputPath;
     std::string outputName;
