@@ -1,0 +1,9 @@
+[submodule "vendor/SDL"]
+	path = vendor/SDL
+	url = https://github.com/libsdl-org/SDL.git
+[submodule "vendor/imgui"]
+	path = vendor/imgui
+	url = https://github.com/ocornut/imgui.git
+[submodule "vendor/vadpcm"]
+	path = vendor/vadpcm
+	url = https://github.com/depp/vadpcm.git
