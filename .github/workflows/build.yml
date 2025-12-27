@@ -36,11 +36,6 @@ jobs:
             libx11-dev libxrandr-dev libxi-dev libxext-dev libxcursor-dev libxss-dev libxtst-dev \
             libwayland-dev libxkbcommon-dev libpulse-dev libasound2-dev
 
-      - name: Apply VADPCM patch (Windows)
-        if: runner.os == 'Windows'
-        run: scripts/apply-vadpcm-patch.ps1
-        shell: pwsh
-
       - name: Configure
         run: cmake -S . -B build ${{ runner.os == 'Windows' && '-A x64' || '' }}
 

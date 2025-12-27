@@ -35,6 +35,7 @@ struct SampleItem {
     uint32_t loopEnd = 0;
     int32_t loopCount = -1;
     uint32_t sampleRate = 0;
+    uint32_t sampleCount = 0;
     double tuning = 0.0;
     std::string status;
 };
@@ -297,7 +298,7 @@ static bool ConvertSample(const SampleItem& item,
         uint32_t loopEnd = item.loopEnd == 0 ? maxIndex : item.loopEnd;
 
         if (loopStart > loopEnd || loopEnd > maxIndex) {
-            status = "Invalid loop range.";
+            status = "Invalid loop range. Max index = " + std::to_string(maxIndex) + ".";
             return false;
         }
 
@@ -387,6 +388,7 @@ int main(int, char**) {
                     item.outputName.reserve(128);
                     if (ReadWavFile(*dropPath, wav, err)) {
                         item.sampleRate = wav.sampleRate;
+                        item.sampleCount = static_cast<uint32_t>(wav.samples.size());
                         item.tuning = static_cast<double>(wav.sampleRate) / 32000.0;
                         item.status = "Ready";
                     } else {
@@ -459,6 +461,7 @@ int main(int, char**) {
                 item.outputName.reserve(128);
                 if (ReadWavFile(path, wav, err)) {
                     item.sampleRate = wav.sampleRate;
+                    item.sampleCount = static_cast<uint32_t>(wav.samples.size());
                     item.tuning = static_cast<double>(wav.sampleRate) / 32000.0;
                     item.status = "Ready";
                 } else {
@@ -525,7 +528,7 @@ int main(int, char**) {
                 ImGui::InputScalar(("##count" + std::to_string(i)).c_str(), ImGuiDataType_S32, &item.loopCount);
 
                 ImGui::TableSetColumnIndex(6);
-                ImGui::Text("%u (%.4f)", item.sampleRate, item.tuning);
+                ImGui::Text("%u (%.4f) / %u", item.sampleRate, item.tuning, item.sampleCount);
 
                 ImGui::TableSetColumnIndex(7);
                 ImGui::TextUnformatted(item.status.c_str());

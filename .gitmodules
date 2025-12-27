@@ -6,4 +6,4 @@
 	url = https://github.com/ocornut/imgui.git
 [submodule "vendor/vadpcm"]
 	path = vendor/vadpcm
-	url = https://github.com/depp/vadpcm.git
+	url = https://github.com/Jameriquiah/vadpcm.git
