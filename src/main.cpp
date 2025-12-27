@@ -400,7 +400,11 @@ int main(int, char**) {
         ImGui_ImplSDL3_NewFrame();
         ImGui::NewFrame();
 
-        ImGui::Begin("SoH Audio Tool");
+        ImGui::SetNextWindowPos(ImVec2(0, 0));
+        ImGui::SetNextWindowSize(io.DisplaySize);
+        ImGui::Begin("SoH Audio Tool", nullptr,
+                     ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
+                         ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse);
 
         ImGui::Text("vadpcm tool:");
         ImGui::SameLine();
@@ -416,6 +420,9 @@ int main(int, char**) {
         outputDir = std::filesystem::u8path(outputDirStr);
 #endif
         ImGui::SameLine();
+#ifndef _WIN32
+        ImGui::BeginDisabled();
+#endif
         if (ImGui::Button("Browse##output")) {
 #ifdef _WIN32
             auto folder = BrowseFolderDialog();
@@ -425,6 +432,11 @@ int main(int, char**) {
             }
 #endif
         }
+#ifndef _WIN32
+        ImGui::EndDisabled();
+        ImGui::SameLine();
+        ImGui::TextDisabled("Manual path or drag-and-drop.");
+#endif
 
         ImGui::TextDisabled("Loop End = 0 uses last sample. Count = -1 means infinite.");
 
